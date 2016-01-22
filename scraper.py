@@ -109,9 +109,24 @@ for link in links:
             data.append([csvYr, csvMth, url])
     except:
         break
-
-
-
+html = requests.get('https://data.gov.uk/dataset/financial-transactions-data-wsht-nhs-trust', headers=ua)
+soup = BeautifulSoup(html.text, 'lxml')
+blocks = soup.find_all('div', 'dropdown')
+for block in blocks:
+    file_url = ''
+    try:
+        file_url = 'http://webarchive.nationalarchives.gov.uk/+/'+block.find('ul', 'dropdown-menu').find_all('li')[1].find('a')['href']
+    except:
+        pass
+    if '.csv' in file_url or '.xls' in file_url or '.xlsx' in file_url:
+        url = file_url
+        title = block.find_previous('div', 'dataset-resource-text').text.strip().split()
+        csvMth = title[1][:3]
+        csvYr = title[0].strip()
+        if '2015' in csvYr:
+            break
+        csvMth = convert_mth_strings(csvMth.upper())
+        data.append([csvYr, csvMth, url])
 
 
 #### STORE DATA 1.0
